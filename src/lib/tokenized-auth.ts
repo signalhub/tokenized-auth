@@ -129,9 +129,6 @@ const decryptJWT = async (encryptedJWT: string, key: CryptoKey): Promise<string>
 }
 
 export const cryptoAuthUtils = {
-  sha256,
-  saveJWTHashToStorage,
-  verifyJWTFromStorage,
   generateEncryptionKey,
   encryptKey,
   decryptKey,
