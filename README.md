@@ -9,7 +9,7 @@ Run `npm i tokenized-auth` to install the library.
 ### Generate key and encrypt it like a secret
 
 ```typescript
-const key = await cryptoAuthUtils.encryptKey();
+const key = await cryptoAuth.encryptKey();
 ```
 Store generated key in the .env file
 

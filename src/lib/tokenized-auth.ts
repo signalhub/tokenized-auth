@@ -119,7 +119,7 @@ const decryptJWT = async (encryptedJWT: string, key: CryptoKey): Promise<string>
   return decoder.decode(decryptedData);
 };
 
-export const cryptoAuthUtils = {
+export const cryptoAuth = {
   generateEncryptionKey,
   encryptKey,
   decryptKey,

@@ -1,10 +1,10 @@
-import { cryptoAuthUtils } from '@tokenized-auth/source';
+import { cryptoAuth } from './tokenized-auth';
 import { describe } from 'vitest';
 
 describe('generateEncryptionKey', () => {
   it('should return a text key', async () => {
     // as util method, should not be used in production
-    const key = await cryptoAuthUtils.generateEncryptionKey();
+    const key = await cryptoAuth.generateEncryptionKey();
     expect(key).toBeDefined();
     expect(key.type).toBe('secret');
     expect(key.extractable).toBe(true);
@@ -16,7 +16,7 @@ describe('generateEncryptionKey', () => {
 
 describe('encryptKey', () => {
   it('should return a text key', async () => {
-    const key = await cryptoAuthUtils.encryptKey();
+    const key = await cryptoAuth.encryptKey();
     expect(typeof key).toBe('string');
     expect(key).not.toBe('');
     expect(() => {
@@ -30,7 +30,7 @@ describe('encryptKey', () => {
 describe('decryptKey', () => {
   it('should return a valid CryptoKey', async () => {
     const encryptedKey = "FSPPSUi+tFZ68sFvW7e1OPM09J4XlqCnJDUTefXukR8=";
-    const decryptedKey = await cryptoAuthUtils.decryptKey(encryptedKey);
+    const decryptedKey = await cryptoAuth.decryptKey(encryptedKey);
 
     expect(decryptedKey).toBeInstanceOf(CryptoKey);
     expect(decryptedKey.type).toBe('secret');
@@ -42,17 +42,17 @@ describe('decryptKey', () => {
   it('should throw an error for invalid encrypted key', async () => {
     const invalidEncryptedKey = "invalid_key";
 
-    await expect(cryptoAuthUtils.decryptKey(invalidEncryptedKey)).rejects.toThrow();
+    await expect(cryptoAuth.decryptKey(invalidEncryptedKey)).rejects.toThrow();
   });
 });
 
 describe('encryptJWT', () => {
   it('should encrypt and decrypt a JWT successfully', async () => {
     const encryptedKey = "FSPPSUi+tFZ68sFvW7e1OPM09J4XlqCnJDUTefXukR8=";
-    const decryptedKey = await cryptoAuthUtils.decryptKey(encryptedKey);
+    const decryptedKey = await cryptoAuth.decryptKey(encryptedKey);
     const jwt = 'jwtAccessTokenExample';
-    const encryptedJWT = await cryptoAuthUtils.encryptJWT(jwt, decryptedKey);
-    const decryptedJWT = await cryptoAuthUtils.decryptJWT(encryptedJWT, decryptedKey);
+    const encryptedJWT = await cryptoAuth.encryptJWT(jwt, decryptedKey);
+    const decryptedJWT = await cryptoAuth.decryptJWT(encryptedJWT, decryptedKey);
 
     expect(decryptedJWT).toEqual(jwt);
   });
@@ -61,10 +61,10 @@ describe('encryptJWT', () => {
 describe('decryptJWT', () => {
   it('should decrypt the encrypted JWT and return the original JWT', async () => {
     const encryptedKey = "FSPPSUi+tFZ68sFvW7e1OPM09J4XlqCnJDUTefXukR8=";
-    const decryptedKey = await cryptoAuthUtils.decryptKey(encryptedKey);
+    const decryptedKey = await cryptoAuth.decryptKey(encryptedKey);
     const originalJWT = 'jwtAccessTokenExample';
-    const encryptedJWT = await cryptoAuthUtils.encryptJWT(originalJWT, decryptedKey);
-    const decryptedJWT = await cryptoAuthUtils.decryptJWT(encryptedJWT, decryptedKey);
+    const encryptedJWT = await cryptoAuth.encryptJWT(originalJWT, decryptedKey);
+    const decryptedJWT = await cryptoAuth.decryptJWT(encryptedJWT, decryptedKey);
 
     expect(decryptedJWT).toEqual(originalJWT);
   });
@@ -72,11 +72,11 @@ describe('decryptJWT', () => {
 
 describe('Generate key and encrypt jwt token', () => {
   it('should return original token jwtAccessTokenExample', async () => {
-    const encryptedKey = await cryptoAuthUtils.encryptKey();
-    const decryptedKey = await cryptoAuthUtils.decryptKey(encryptedKey);
+    const encryptedKey = await cryptoAuth.encryptKey();
+    const decryptedKey = await cryptoAuth.decryptKey(encryptedKey);
     const jwt = 'jwtAccessTokenExample';
-    const encryptedJWT = await cryptoAuthUtils.encryptJWT(jwt, decryptedKey);
-    const decryptedJWT = await cryptoAuthUtils.decryptJWT(encryptedJWT, decryptedKey);
+    const encryptedJWT = await cryptoAuth.encryptJWT(jwt, decryptedKey);
+    const decryptedJWT = await cryptoAuth.decryptJWT(encryptedJWT, decryptedKey);
 
     expect(decryptedJWT).toEqual(jwt);
   });

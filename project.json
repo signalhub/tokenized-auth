@@ -9,6 +9,8 @@
       "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
+        "skipTypeField": true,
+        "format": ["esm", "cjs"],
         "outputPath": "dist/tokenized-auth",
         "main": "./src/index.ts",
         "tsConfig": "./tsconfig.lib.json",
