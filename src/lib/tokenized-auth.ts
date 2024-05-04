@@ -1,5 +1,3 @@
-import { webcrypto as crypto } from 'crypto';
-
 /**
  * Calculates SHA-256 hash of the input string
  * @param message - input string
@@ -119,10 +117,101 @@ const decryptJWT = async (encryptedJWT: string, key: CryptoKey): Promise<string>
   return decoder.decode(decryptedData);
 };
 
+
+/**
+ * Generates an encryption key using a secret parameter
+ * @param secret - secret parameter used for key generation
+ * @returns CryptoKey
+ */
+const generateEncryptionSecretKey = async (secret: string): Promise<CryptoKey> => {
+  const encoder = new TextEncoder();
+  const secretKey = await crypto.subtle.importKey(
+    'raw',
+    encoder.encode(secret),
+    { name: 'PBKDF2' },
+    false,
+    ['deriveKey']
+  );
+
+  return await crypto.subtle.deriveKey(
+    {
+      name: 'PBKDF2',
+      salt: crypto.getRandomValues(new Uint8Array(16)),
+      iterations: 100000,
+      hash: 'SHA-256',
+    },
+    secretKey,
+    { name: 'AES-GCM', length: 256 },
+    true,
+    ['encrypt', 'decrypt']
+  );
+};
+
+/**
+ * Generates an encryption key using a secret parameter and returns it as a base64 string
+ * @param secret - secret parameter used for key generation
+ * @returns base64 string
+ */
+const encryptSecretKey = async (secret: string): Promise<string> => {
+  const key = await generateEncryptionSecretKey(secret);
+  const exportedKey = await crypto.subtle.exportKey('raw', key);
+  const exportedKeyBuffer = Buffer.from(exportedKey);
+  return exportedKeyBuffer.toString('base64');
+};
+
+ /**
+ * Decrypts the input key using a secret parameter and verifies the decryption
+ * @param encryptedKey - input encrypted key
+ * @param secret - secret parameter used for key generation
+ * @returns decrypted key if successful, null otherwise
+ */
+ const decryptSecretKey = async (encryptedKey: string, secret: string): Promise<CryptoKey | null> => {
+    try {
+      const exportedKey = Buffer.from(encryptedKey, 'base64');
+      const secretKey = await crypto.subtle.importKey(
+        'raw',
+        new TextEncoder().encode(secret),
+        { name: 'PBKDF2' },
+        false,
+        ['deriveKey']
+      );
+
+      const decryptedKey = await crypto.subtle.deriveKey(
+        {
+          name: 'PBKDF2',
+          salt: crypto.getRandomValues(new Uint8Array(16)),
+          iterations: 100000,
+          hash: 'SHA-256',
+        },
+        secretKey,
+        { name: 'AES-GCM', length: 256 },
+        true,
+        ['encrypt', 'decrypt']
+      );
+
+      // Verify the decryption by comparing the original and decrypted keys
+      const originalKey = await generateEncryptionSecretKey(secret);
+      const originalKeyBuffer = await crypto.subtle.exportKey('raw', originalKey);
+      const decryptedKeyBuffer = await crypto.subtle.exportKey('raw', decryptedKey);
+
+      if (Buffer.from(originalKeyBuffer).equals(Buffer.from(decryptedKeyBuffer))) {
+        return decryptedKey;
+      } else {
+        console.error('Decryption failed. The secret parameter may be incorrect.');
+        return null;
+      }
+    } catch (error) {
+      console.error('Error during decryption:', error);
+      return null;
+    }
+  };
+
 export const cryptoAuth = {
   generateEncryptionKey,
   encryptKey,
   decryptKey,
   encryptJWT,
   decryptJWT,
+  encryptSecretKey,
+  decryptSecretKey,
 };

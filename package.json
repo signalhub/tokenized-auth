@@ -1,6 +1,6 @@
 {
-  "name": "tokenized-crypto-auth",
-  "version": "0.0.1",
+  "name": "crypto-auth-token",
+  "version": "0.0.3",
   "license": "MIT",
   "scripts": {
     "build": "nx build",
