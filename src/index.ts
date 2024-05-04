@@ -1,1 +1,1 @@
-export * from './lib/tokenized-auth';
+export { cryptoAuthUtils } from './lib/tokenized-auth';

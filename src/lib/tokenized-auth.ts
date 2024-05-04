@@ -11,7 +11,7 @@ const sha256 = async (message: string) => {
   const hash = await crypto.subtle.digest('SHA-256', data);
   const hashArray = Array.from(new Uint8Array(hash));
   return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-}
+};
 
 /**
  * Calculates SHA-256 hash of the input string
@@ -22,7 +22,7 @@ const sha256 = async (message: string) => {
 const saveJWTHashToStorage = async (jwt: string, storageKey = "accessTokenHash") => {
   const jwtHash = await sha256(jwt);
   localStorage.setItem(storageKey, jwtHash);
-}
+};
 
 /**
  * Verifies if the JWT hash stored in the storage is equal to the hash of the input JWT
@@ -37,7 +37,7 @@ const verifyJWTFromStorage = async (jwt: string,  storageKey = "accessTokenHash"
     return jwtHash === storedJWTHash;
   }
   return false;
-}
+};
 
 /**
  * Generates an encryption key
@@ -49,7 +49,7 @@ const generateEncryptionKey = async (): Promise<CryptoKey> => {
     true,
     ['encrypt', 'decrypt']
   );
-}
+};
 
 /**
  * Generates an encryption key and returns it as a base64 string
@@ -60,7 +60,7 @@ const encryptKey = async (): Promise<string> => {
   const exportedKey = await crypto.subtle.exportKey('raw', key);
   const exportedKeyBuffer = Buffer.from(exportedKey);
   return exportedKeyBuffer.toString('base64');
-}
+};
 
 /**
  * Decrypts the input key
@@ -76,7 +76,7 @@ const decryptKey = async (encryptedKey: string): Promise<CryptoKey> => {
     true,
     ['encrypt', 'decrypt']
   );
-}
+};
 
 /**
  * Encrypts the input JWT with the input key
@@ -97,7 +97,7 @@ const encryptJWT = async (jwt: string, key: CryptoKey): Promise<string> => {
   const base64IV = Buffer.from(iv).toString('base64');
   const base64EncryptedJWT = Buffer.from(encryptedJWT, 'binary').toString('base64');
   return `${base64IV}.${base64EncryptedJWT}`;
-}
+};
 
 /**
  * Decrypts the input JWT with the input key
@@ -117,7 +117,7 @@ const decryptJWT = async (encryptedJWT: string, key: CryptoKey): Promise<string>
   );
   const decoder = new TextDecoder();
   return decoder.decode(decryptedData);
-}
+};
 
 export const cryptoAuthUtils = {
   generateEncryptionKey,
@@ -125,4 +125,4 @@ export const cryptoAuthUtils = {
   decryptKey,
   encryptJWT,
   decryptJWT,
-}
+};
