@@ -34,7 +34,7 @@ const encryptSecretKey = async (secret, salt) => {
 };
 
 const generateEnvFile = async (secret, envFilePath) => {
-  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const salt = new Uint8Array(16);
 
   const encryptionKey = await encryptSecretKey(secret, salt);
 

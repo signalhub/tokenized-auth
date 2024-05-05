@@ -1,4 +1,4 @@
-# Tokenized auth
+# Crypto auth data
 
 ## Install
 
@@ -6,43 +6,45 @@ Run `npm i crypto-auth-data` to install the library.
 
 ## How to use
 
-### Generate key and encrypt it like a secret
+### 1. Generate key and encrypt it like a secret
 
-```typescript
-const key = await cryptoAuth.encryptKey();
-```
-Store generated key in the .env file
-
-Or you can generate this key then you build your application just create a file `generate-env.js` in the root of your project with the following content:
-
-```javascript
-const fs = require('fs');
-const crypto = require('crypto').webcrypto;
-
-async function generateEncryptionKey() {
-  const key = await crypto.subtle.generateKey(
-    { name: 'AES-GCM', length: 256 },
-    true,
-    ['encrypt', 'decrypt']
-  );
-  const exportedKey = await crypto.subtle.exportKey('raw', key);
-  const exportedKeyBuffer = Buffer.from(exportedKey);
-  return exportedKeyBuffer.toString('base64');
-}
-
-async function generateEnv() {
-  const secretKey = await generateEncryptionKey();
-  const envContent = `\nENCRYPTION_KEY=${secretKey}\n`;
-  fs.appendFileSync('.env', envContent);
-}
-
-generateEnv().then();
-````
-and update your `package.json` file:
+Add script to your `package.json` file:
 ```json
 "scripts": {
-  "build": "node generate-env.js && next build",
-  // ...
-}
+  "generate-key": "node node_modules/crypto-auth-data/src/utils/generate-key.js -- --secret \"my-secret-phrase\" --output \"path/to/project/.env\""
+},
+```
+in the .env file you will have the following variables
+```env
+ENCRYPTION_KEY=eoEG4sJQxPHurfzgYSJ7Vmlwsk7poKXiHlq8MQxvjp4=
 ```
 
+### 2. Decrypt generated key
+
+```typescript
+import { cryptoData } from 'crypto-auth-data';
+
+const salt = new Uint8Array(16);
+const key = process.env.ENCRYPTION_KEY
+const decryptedKey = await cryptoData.decryptSecretKey(key, salt);
+
+```
+
+### 3. Encrypt JWT data
+
+```typescript
+if (decryptedKey) {
+  const encryptJWT = await cryptoData.encryptJWT(response.token.accessToken, decryptedKey); // save it to localStorage
+}
+
+```
+
+### 4. Decrypt JWT data for every request
+
+Get encryptJWT from localStorage and decrypt it
+
+```typescript
+const accessToken = await cryptoData.decryptJWT(encryptJWT, decryptedKey);
+headers.set("Authorization", `Bearer ${accessToken}`);
+
+````
