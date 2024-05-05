@@ -38,10 +38,28 @@ const generateEnvFile = async (secret, envFilePath) => {
 
   const encryptionKey = await encryptSecretKey(secret, salt);
 
-  const envContent = `ENCRYPTION_KEY=${encryptionKey}\n`;
+  try {
+    let envContent = '';
 
-  fs.writeFileSync(envFilePath, envContent);
-  console.log(`Encryption key generated and saved to ${envFilePath}.`);
+    if (fs.existsSync(envFilePath)) {
+      envContent = fs.readFileSync(envFilePath, 'utf8');
+    }
+
+    const keyPattern = /^ENCRYPTION_KEY=.*/m;
+    const newKeyLine = `ENCRYPTION_KEY=${encryptionKey}`;
+
+    if (keyPattern.test(envContent)) {
+      envContent = envContent.replace(keyPattern, newKeyLine);
+    } else {
+      envContent += `\n${newKeyLine}\n`;
+    }
+
+    fs.writeFileSync(envFilePath, envContent);
+    console.log(`Encryption key updated in ${envFilePath}.`);
+  } catch (error) {
+    console.error('Error updating env file:', error);
+    process.exit(1);
+  }
 };
 
 const getArgFromArgs = (argName) => {
@@ -53,10 +71,20 @@ const getArgFromArgs = (argName) => {
 };
 
 const secret = getArgFromArgs('--secret');
-const envFilePath = getArgFromArgs('--output') || '.env';
+const outputArg = getArgFromArgs('--output');
+const envFilePath = outputArg ? path.resolve(outputArg) : '.env';
+
+const generateEnvFileAsync = async (secret, envFilePath) => {
+  try {
+    await generateEnvFile(secret, envFilePath);
+  } catch (error) {
+    console.error('Error generating env file:', error);
+    process.exit(1);
+  }
+};
 
 if (secret) {
-  generateEnvFile(secret, path.resolve(envFilePath)).then();
+  generateEnvFileAsync(secret, envFilePath).then();
 } else {
   console.error('Please provide a secret key using the --secret argument.');
   process.exit(1);
