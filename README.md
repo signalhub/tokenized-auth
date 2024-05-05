@@ -2,7 +2,7 @@
 
 ## Install
 
-Run `npm i tokenized-auth` to install the library.
+Run `npm i crypto-auth-data` to install the library.
 
 ## How to use
 
