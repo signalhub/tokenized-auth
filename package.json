@@ -4,7 +4,8 @@
   "license": "MIT",
   "scripts": {
     "build": "nx build",
-    "test": "nx test"
+    "test": "nx test",
+    "generate-key": "cd src/utils && node generate-key.js --secret \"my-secret-key\" --output \"/Users/anton.zaloev/projects/signalhub/tokenized-auth/src/.env\""
   },
   "dependencies": {
     "tslib": "^2.3.0"

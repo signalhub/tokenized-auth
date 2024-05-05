@@ -14,7 +14,7 @@
         "outputPath": "dist/tokenized-auth",
         "main": "./src/index.ts",
         "tsConfig": "./tsconfig.lib.json",
-        "assets": ["*.md"]
+        "assets": ["*.md", "src/utils/generate-key.js"]
       }
     },
     "lint": {
