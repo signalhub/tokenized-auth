@@ -14,7 +14,7 @@ Add script to your `package.json` file:
   "generate-key": "node node_modules/crypto-auth-data/src/utils/generate-key.js -- --secret \"my-secret-phrase\" --output \"path/to/project/.env\""
 },
 ```
-in the .env file you will have the following variables
+Example of the .env file you will have, after running the script above
 ```env
 ENCRYPTION_KEY=eoEG4sJQxPHurfzgYSJ7Vmlwsk7poKXiHlq8MQxvjp4=
 ```
@@ -30,21 +30,21 @@ const decryptedKey = await cryptoData.decryptSecretKey(key, salt);
 
 ```
 
-### 3. Encrypt JWT data
+### 3. Encrypt JWT data and save it to localStorage, for example
 
 ```typescript
 if (decryptedKey) {
-  const encryptJWT = await cryptoData.encryptJWT(response.token.accessToken, decryptedKey); // save it to localStorage
+  const encryptedJWT = await cryptoData.encryptJWT(response.token.accessToken, decryptedKey);
 }
 
 ```
 
 ### 4. Decrypt JWT data for every request
 
-Get encryptJWT from localStorage and decrypt it
+Get encryptedJWT from localStorage and decrypt it
 
 ```typescript
-const accessToken = await cryptoData.decryptJWT(encryptJWT, decryptedKey);
+const accessToken = await cryptoData.decryptJWT(encryptedJWT, decryptedKey);
 headers.set("Authorization", `Bearer ${accessToken}`);
 
 ````

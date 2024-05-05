@@ -1,6 +1,6 @@
 {
   "name": "crypto-auth-data",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "license": "MIT",
   "description": "A simple library to encrypt and decrypt data using AES-256-CBC algorithm",
   "repository": {
