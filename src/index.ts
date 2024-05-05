@@ -1,1 +1,1 @@
-export { cryptoAuth } from './lib/tokenized-auth';
+export { cryptoData } from './lib/encription';

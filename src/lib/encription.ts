@@ -121,9 +121,10 @@ const decryptJWT = async (encryptedJWT: string, key: CryptoKey): Promise<string>
 /**
  * Generates an encryption key using a secret parameter
  * @param secret - secret parameter used for key generation
+ * @param salt - salt used for key generation
  * @returns CryptoKey
  */
-const generateEncryptionSecretKey = async (secret: string): Promise<CryptoKey> => {
+const generateEncryptionSecretKey = async (secret: string, salt: Uint8Array): Promise<CryptoKey> => {
   const encoder = new TextEncoder();
   const secretKey = await crypto.subtle.importKey(
     'raw',
@@ -136,7 +137,7 @@ const generateEncryptionSecretKey = async (secret: string): Promise<CryptoKey> =
   return await crypto.subtle.deriveKey(
     {
       name: 'PBKDF2',
-      salt: crypto.getRandomValues(new Uint8Array(16)),
+      salt: salt,
       iterations: 100000,
       hash: 'SHA-256',
     },
@@ -150,64 +151,52 @@ const generateEncryptionSecretKey = async (secret: string): Promise<CryptoKey> =
 /**
  * Generates an encryption key using a secret parameter and returns it as a base64 string
  * @param secret - secret parameter used for key generation
+ * @param salt - salt used for key generation
  * @returns base64 string
  */
-const encryptSecretKey = async (secret: string): Promise<string> => {
-  const key = await generateEncryptionSecretKey(secret);
+const encryptSecretKey = async (secret: string, salt: Uint8Array): Promise<string> => {
+  const key = await generateEncryptionSecretKey(secret, salt);
   const exportedKey = await crypto.subtle.exportKey('raw', key);
   const exportedKeyBuffer = Buffer.from(exportedKey);
+  console.log(exportedKeyBuffer.toString('base64'), salt);
   return exportedKeyBuffer.toString('base64');
 };
 
  /**
  * Decrypts the input key using a secret parameter and verifies the decryption
- * @param encryptedKey - input encrypted key
  * @param secret - secret parameter used for key generation
+  * @param salt - salt used for key generation
  * @returns decrypted key if successful, null otherwise
  */
- const decryptSecretKey = async (encryptedKey: string, secret: string): Promise<CryptoKey | null> => {
-    try {
-      const exportedKey = Buffer.from(encryptedKey, 'base64');
-      const secretKey = await crypto.subtle.importKey(
-        'raw',
-        new TextEncoder().encode(secret),
-        { name: 'PBKDF2' },
-        false,
-        ['deriveKey']
-      );
+ const decryptSecretKey = async (secret: string, salt: Uint8Array): Promise<CryptoKey | null> => {
+   const secretKey = await crypto.subtle.importKey(
+     'raw',
+     new TextEncoder().encode(secret),
+     { name: 'PBKDF2' },
+     false,
+     ['deriveKey']
+   );
 
-      const decryptedKey = await crypto.subtle.deriveKey(
-        {
-          name: 'PBKDF2',
-          salt: crypto.getRandomValues(new Uint8Array(16)),
-          iterations: 100000,
-          hash: 'SHA-256',
-        },
-        secretKey,
-        { name: 'AES-GCM', length: 256 },
-        true,
-        ['encrypt', 'decrypt']
-      );
+   const decryptedKey = await crypto.subtle.deriveKey(
+     {
+       name: 'PBKDF2',
+       salt: salt,
+       iterations: 100000,
+       hash: 'SHA-256',
+     },
+     secretKey,
+     { name: 'AES-GCM', length: 256 },
+     true,
+     ['encrypt', 'decrypt']
+   );
 
-      // Verify the decryption by comparing the original and decrypted keys
-      const originalKey = await generateEncryptionSecretKey(secret);
-      const originalKeyBuffer = await crypto.subtle.exportKey('raw', originalKey);
-      const decryptedKeyBuffer = await crypto.subtle.exportKey('raw', decryptedKey);
+   const decryptedKeyBuffer = await crypto.subtle.exportKey('raw', decryptedKey);
+   return decryptedKeyBuffer ? decryptedKey : null;
+ };
 
-      if (Buffer.from(originalKeyBuffer).equals(Buffer.from(decryptedKeyBuffer))) {
-        return decryptedKey;
-      } else {
-        console.error('Decryption failed. The secret parameter may be incorrect.');
-        return null;
-      }
-    } catch (error) {
-      console.error('Error during decryption:', error);
-      return null;
-    }
-  };
-
-export const cryptoAuth = {
+export const cryptoData = {
   generateEncryptionKey,
+  generateEncryptionSecretKey,
   encryptKey,
   decryptKey,
   encryptJWT,
