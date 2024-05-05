@@ -158,14 +158,13 @@ const encryptSecretKey = async (secret: string, salt: Uint8Array): Promise<strin
   const key = await generateEncryptionSecretKey(secret, salt);
   const exportedKey = await crypto.subtle.exportKey('raw', key);
   const exportedKeyBuffer = Buffer.from(exportedKey);
-  console.log(exportedKeyBuffer.toString('base64'), salt);
   return exportedKeyBuffer.toString('base64');
 };
 
  /**
  * Decrypts the input key using a secret parameter and verifies the decryption
  * @param secret - secret parameter used for key generation
-  * @param salt - salt used for key generation
+ * @param salt - salt used for key generation
  * @returns decrypted key if successful, null otherwise
  */
  const decryptSecretKey = async (secret: string, salt: Uint8Array): Promise<CryptoKey | null> => {
